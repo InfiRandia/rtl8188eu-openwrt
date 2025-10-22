@@ -1,0 +1,51 @@
+From 455fc1510282cbf2d40b2c45e6cf38ab037e4cab Mon Sep 17 00:00:00 2001
+From: Alice Heather <AliceHeather64@gmail.com>
+Date: Thu, 23 Oct 2025 09:43:06 +0200
+Subject: [PATCH 2/3] Fix strcmp changes
+
+---
+ core/rtw_mlme_ext.c | 4 ++--
+ core/rtw_rf.c       | 4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/core/rtw_mlme_ext.c b/core/rtw_mlme_ext.c
+index 389316d..ff0cd0c 100644
+--- a/core/rtw_mlme_ext.c
++++ b/core/rtw_mlme_ext.c
+@@ -198,9 +198,9 @@ void rtw_txpwr_init_regd(struct rf_ctl_t *rfctl)
+ 	if (exc) {
+ 		u8 has_country = (exc->country[0] == '\0' && exc->country[1] == '\0') ? 0 : 1;
+ 
+-		if (strcmp(exc->regd_name, regd_str(TXPWR_LMT_NONE)) == 0)
++		if (strscpy(exc->regd_name, regd_str(TXPWR_LMT_NONE)) == 0)
+ 			rfctl->regd_name = regd_str(TXPWR_LMT_NONE);
+-		else if (strcmp(exc->regd_name, regd_str(TXPWR_LMT_WW)) == 0)
++		else if (strscpy(exc->regd_name, regd_str(TXPWR_LMT_WW)) == 0)
+ 			rfctl->regd_name = regd_str(TXPWR_LMT_WW);
+ 		else {
+ 			ent = _rtw_txpwr_lmt_get_by_name(rfctl, exc->regd_name);
+diff --git a/core/rtw_rf.c b/core/rtw_rf.c
+index 60c95c7..23dc5a9 100644
+--- a/core/rtw_rf.c
++++ b/core/rtw_rf.c
+@@ -2000,7 +2000,7 @@ void dump_txpwr_lmt(void *sel, _adapter *adapter)
+ 							ent = LIST_CONTAINOR(cur, struct txpwr_lmt_ent, list);
+ 							cur = get_next(cur);
+ 							_RTW_PRINT_SEL(sel, "%3c "
+-								, strcmp(ent->regd_name, rfctl->regd_name) == 0 ? rf_path_char(path) : ' ');
++								, strscpy(ent->regd_name, rfctl->regd_name) == 0 ? rf_path_char(path) : ' ');
+ 						}
+ 						_RTW_PRINT_SEL(sel, "%3c "
+ 								, strcmp(rfctl->regd_name, regd_str(TXPWR_LMT_WW)) == 0 ? rf_path_char(path) : ' ');
+@@ -2212,7 +2212,7 @@ struct txpwr_lmt_ent *_rtw_txpwr_lmt_get_by_name(struct rf_ctl_t *rfctl, const c
+ 		ent = LIST_CONTAINOR(cur, struct txpwr_lmt_ent, list);
+ 		cur = get_next(cur);
+ 
+-		if (strcmp(ent->regd_name, regd_name) == 0) {
++		if (strscpy(ent->regd_name, regd_name) == 0) {
+ 			found = 1;
+ 			break;
+ 		}
+-- 
+2.51.1.dirty
+
